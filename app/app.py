@@ -60,6 +60,9 @@ import datetime
 
 app = Flask(__name__)
 
+DATA_PATH = r"C:\Users\adel mohamedll\Desktop\project\testing\Global Sustainable Bonds Data.csv"
+
+
 # ---------- Helper Functions ----------
 def detect_date_column(df):
     for col in df.columns:
@@ -73,6 +76,7 @@ def detect_date_column(df):
                 pass
     return None
 
+
 def detect_price_column(df):
     for col in df.columns:
         name = str(col).lower()
@@ -81,6 +85,7 @@ def detect_price_column(df):
                 return col
     numeric_cols = df.select_dtypes(include=["float64", "int64", "float32", "int32"]).columns
     return numeric_cols[0] if len(numeric_cols) > 0 else None
+
 
 def preprocess_data(data_or_path, save=True, date_col=None, price_col=None):
     if isinstance(data_or_path, pd.DataFrame):
@@ -91,9 +96,9 @@ def preprocess_data(data_or_path, save=True, date_col=None, price_col=None):
         elif data_or_path.endswith((".xlsx", ".xls")):
             data = pd.read_excel(data_or_path)
         else:
-            raise ValueError(" نوع الملف غير مدعوم")
+            raise ValueError(" File type not supported")
     else:
-        raise ValueError(" preprocess_data يستقبل إما DataFrame أو Path")
+        raise ValueError(" preprocess_data receives either a DataFrame or a Path")
 
     data.dropna(how="all", inplace=True)
 
@@ -111,7 +116,7 @@ def preprocess_data(data_or_path, save=True, date_col=None, price_col=None):
     if price_col is None:
         price_col = detect_price_column(data)
     if not price_col:
-        raise ValueError("لم يتم العثور على عمود قيمة مناسب")
+        raise ValueError("No suitable column value found")
 
     data[price_col] = pd.to_numeric(data[price_col], errors="coerce")
     data = data.dropna(subset=[price_col])
@@ -129,6 +134,7 @@ def preprocess_data(data_or_path, save=True, date_col=None, price_col=None):
 
     return data, date_col, price_col
 
+
 def train_or_load_model(data, force_train=True):
     model_path = "model.pkl"
 
@@ -136,16 +142,17 @@ def train_or_load_model(data, force_train=True):
         with open(model_path, "rb") as f:
             model = pickle.load(f)
         return model
-    
+
     model = KMeans(n_clusters=3, random_state=42)
     model.fit(data[["daily_return"]])
-    
+
     score = silhouette_score(data[['daily_return']], model.labels_)
     print("Silhouette Score:", score)
 
     with open(model_path, "wb") as f:
         pickle.dump(model, f)
     return model
+
 
 # ---------- Risk Metrics ----------
 def calculate_risk_metrics(df):
@@ -161,11 +168,11 @@ def calculate_risk_metrics(df):
         sensitivity = 0.0
 
     if volatility < 10:
-        risk_level = "منخفض المخاطر"
+        risk_level = "Low Risk"
     elif volatility < 20:
-        risk_level = "متوسط المخاطر"
+        risk_level = "Medium Risk"
     else:
-        risk_level = "عالي المخاطر"
+        risk_level = "High Risk"
 
     return {
         "العائد المتوقع": f"{expected_return}%",
@@ -174,6 +181,7 @@ def calculate_risk_metrics(df):
         "التذبذب (Volatility)": f"{volatility}%",
         "مستوى المخاطرة": risk_level
     }
+
 
 # ---------- Forecasting (ARIMA) ----------
 def forecast_future(df, date_col, price_col, periods=7):
@@ -206,80 +214,51 @@ def forecast_future(df, date_col, price_col, periods=7):
         "accuracy_rmse": round(rmse, 2)
     }
 
+
 # ---------- Routes ----------
 @app.route("/", methods=["GET", "POST"])
 def index():
     results, chart_data, prediction, forecast_data, error = None, None, None, None, None
-
+    summary = None
     if request.method == "POST":
         try:
             df = None
             form_type = request.form.get("form_type", None)
 
+            # ---------- Manual Input ----------
             if form_type == "manual":
+                df = pd.read_csv(DATA_PATH)
+                df["Amount"] = pd.to_numeric(df["Amount"], errors="coerce")
+
                 country = request.form.get("country")
                 sector = request.form.get("sector")
                 period = request.form.get("period")
-                bond_min = request.form.get("bond_min")
-                bond_max = request.form.get("bond_max")
+                bond_min = float(request.form.get("bond_min"))
+                bond_max = float(request.form.get("bond_max"))
 
-                if not (country and sector and period and bond_min and bond_max):
-                    error = "الرجاء تعبئة جميع حقول الإدخال اليدوي"
-                    return render_template("index.html", results=None, error=error)
+                filtered = df[
+                    (df["Issuer location"] == country) &
+                    (df["Issuer sector"] == sector) &
+                    (df["Bond type"] == period) &
+                    (df["Amount"].between(bond_min, bond_max))
+                ]
 
-                try:
-                    bond_min = float(bond_min)
-                    bond_max = float(bond_max)
-                except ValueError:
-                    error = " قيمة Bond Min/Max غير صحيحة"
-                    return render_template("index.html", results=None, error=error)
+                if not filtered.empty:
+                    results = filtered.to_html(classes="table table-bordered table-striped", index=False)
+                    summary = {
+                        "count": len(filtered),
+                        "avg_bond": round(filtered["Amount"].mean(), 2),
+                        "total_bond": round(filtered["Amount"].sum(), 2)
+                    }
+                else:
+                    summary = {}
+                return render_template("index2.html", results=results, summary=summary, error=error)
 
-                filepath = r"C:\Users\adel mohamedll\Desktop\Green Bond Risk Assessment project\Data\Global Sustainable Bonds Data.csv"
-                if not os.path.exists(filepath):
-                    error = " ملف البيانات المحلي غير موجود (تحقق من المسار)"
-                    return render_template("index.html", results=None, error=error)
-
-                df_full = pd.read_csv(filepath)
-
-                cols_lower = {c: c for c in df_full.columns}
-                required_lower = ["Issuer location", "Issuer sector", "Bond type", "amount"]
-                if not all(r in cols_lower for r in required_lower):
-                    missing = [r for r in required_lower if r not in cols_lower]
-                    error = f" الأعمدة المطلوبة غير موجودة: {missing}"
-                    return render_template("index.html", results=None, error=error)
-
-                loc_col = cols_lower["Issuer location"]
-                sector_col = cols_lower["Issuer sector"]
-                bondtype_col = cols_lower["Bond type"]
-                amount_col = cols_lower["amount"]
-
-
-                print("المواقع:", df["Issuer location"].unique())
-                print("القطاعات:", df["Issuer sector"].unique())
-                print("الفترات:", df["Bond type"].unique())
-                print("أقل وأكبر مبلغ:", df["Amount"].min(), df["Amount"].max())
-
-                df_full[amount_col] = pd.to_numeric(df_full[amount_col], errors="coerce")
-                filtered_df = df[
-                (df["Issuer location"].str.strip().str.lower() == country.strip().lower()) &
-                (df["Issuer sector"].str.strip().str.lower() == sector.strip().lower()) &
-                (df["Bond type"].str.strip().str.lower() == period.strip().lower()) &
-                (df["Amount"].between(bond_min, bond_max))
-                 ]
-
-
-                if filtered_df.empty:
-                    error = "لا توجد بيانات بعد تطبيق الفلاتر"
-                    return render_template("index.html", results=None, error=error)
-
-                df, date_col, price_col = preprocess_data(filtered_df, price_col=amount_col)
-
-
-
+            # ---------- File Upload ----------
             elif form_type == "upload" or ("file" in request.files and request.files["file"].filename != ""):
                 file = request.files.get("file")
                 if not file or file.filename == "":
-                    error = " لم يتم رفع ملف"
+                    error = " File not uploaded"
                     return render_template("index.html", results=None, error=error)
 
                 filename = secure_filename(file.filename)
@@ -289,56 +268,62 @@ def index():
 
                 df, date_col, price_col = preprocess_data(filepath)
 
-            else:
-                error = " لم يتم إدخال بيانات أو رفع ملف (تأكد من اختيار طريقة الإدخال في الواجهة)"
-                return render_template("index.html", results=None, error=error)
+                if len(df) < 5:
+                    error = " Data is too little to predict."
+                    return render_template("index.html", results=None, error=error)
 
-            if df is len(df) < 5:
-                error = " البيانات قليلة جدًا للتنبؤ"
-                return render_template("index.html", results=None, error=error)
+                df["cum_return"] = (1 + df["daily_return"]).cumprod()
 
-            df["cum_return"] = (1 + df["daily_return"]).cumprod()
+                model = train_or_load_model(df)
+                df["cluster"] = model.predict(df[["daily_return"]])
 
-            model = train_or_load_model(df)
-            df["cluster"] = model.predict(df[["daily_return"]])
+                cluster_means = df.groupby("cluster")["daily_return"].mean().sort_values()
+                sorted_idx = list(cluster_means.index)
+                mapping = {}
+                if len(sorted_idx) >= 3:
+                    mapping = {
+                        sorted_idx[0]: "Low",
+                        sorted_idx[1]: "Good",
+                        sorted_idx[2]: "Excellent"
+                    }
+                else:
+                    for i, cl in enumerate(sorted_idx):
+                        mapping[cl] = ["bad", "Good", "Excellent"][i if i < 3 else -1]
 
-            cluster_means = df.groupby("cluster")["daily_return"].mean().sort_values()
+                df["final_label"] = df["cluster"].map(mapping)
 
-            sorted_idx = list(cluster_means.index)
-            mapping = {}
-            if len(sorted_idx) >= 3:
-                mapping = {
-                    sorted_idx[0]: "ضعيف",
-                    sorted_idx[1]: "جيد",
-                    sorted_idx[2]: "ممتاز"
+                prediction = calculate_risk_metrics(df)
+                results = df[[date_col, price_col, "daily_return", "final_label"]].tail(10)
+
+                chart_data = {
+                    "labels": df[date_col].dt.strftime("%Y-%m-%d").tolist(),
+                    "values": df[price_col].astype(float).tolist()
                 }
+
+                forecast_data = forecast_future(df, date_col=date_col, price_col=price_col, periods=7)
+
+                return render_template(
+                    "index.html",
+                    results=results,
+                    summary=summary,
+                    chart_data=chart_data,
+                    prediction=prediction,
+                    forecast_data=forecast_data,
+                    error=error
+                )
+
             else:
-                for i, cl in enumerate(sorted_idx):
-                    mapping[cl] = ["ضعيف", "جيد", "ممتاز"][i if i < 3 else -1]
-
-            df["final_label"] = df["cluster"].map(mapping)
-
-            prediction = calculate_risk_metrics(df)
-            results = df[[date_col, price_col, "daily_return", "final_label"]].tail(10)
-
-            chart_data = {
-                "labels": df[date_col].dt.strftime("%Y-%m-%d").tolist(),
-                "values": df[price_col].astype(float).tolist()
-            }
-
-            forecast_data = forecast_future(df, date_col=date_col, price_col=price_col, periods=7)
+                error = " No data entered or file uploaded"
+                return render_template("index.html", results=None, error=error)
 
         except Exception as e:
             error = f" خطأ أثناء المعالجة: {str(e)}"
 
-    return render_template(
-        "index.html",
-        results=results,
-        chart_data=chart_data,
-        prediction=prediction,
-        forecast_data=forecast_data,
-        error=error
-    )
+    return render_template("index.html", results=results, summary=summary,
+                           chart_data=chart_data, prediction=prediction,
+                           forecast_data=forecast_data, error=error)
+
 
 if __name__ == "__main__":
     app.run(debug=True)
+
