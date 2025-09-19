@@ -27,7 +27,24 @@ This project provides:
 - **ML Models**: KMeans (Clustering), ARIMA (Forecasting)  
 
 ---
-
+## 📂 Repository Structure
+```
+data-warehouse-project/
+│
+├── data/
+├   ├── train       
+│   ├── test_data                             
+├── app/
+├   ├── app.py      
+│   ├── preprocess_data.py  
+│   ├── train_or_load_model.py      
+│   ├── risk_analysis.py
+├── templates/
+├   ├── index.html
+├── README.md                           # Project overview and instructions
+├── LICENSE                             # License information for the repository
+├── .gitignore                          # Files and directories to be ignored by Git
+```
 ## 🚀 How to Run
 ```bash
 # Clone repo
