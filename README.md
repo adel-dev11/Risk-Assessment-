@@ -39,6 +39,10 @@ data-warehouse-project/
 │   ├── preprocess_data.py  
 │   ├── train_or_load_model.py      
 │   ├── risk_analysis.py
+├── models/
+├   ├── model.pkl      
+│   ├── labelencoder.pkl  
+│   ├── kmean.pkl
 ├── templates/
 ├   ├── index.html
 ├── README.md                           # Project overview and instructions
