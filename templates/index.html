@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>📊 Green Bonds Risk Assessment</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1"></script>
+
+<style>
+  body {
+    background: linear-gradient(135deg, #dddfd3, #4b658a); 
+    font-family: "Segoe UI", Tahoma, sans-serif;
+    direction: rtl;
+    color: #2f3d61;
+  }
+
+  .brand {
+    font-weight: 900;
+    font-size: 2rem;
+    background: linear-gradient(45deg, #2f3d61, #22345b, #4b658a);
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-align: center;
+    display: block;
+    transition: transform 0.3s ease;
+    letter-spacing: 1px;
+  }
+  .brand:hover { transform: scale(1.08) rotate(-1deg); }
+
+  .stat-card {
+    border-radius: 18px;
+    background: linear-gradient(145deg, #ffffff, #dddfd3);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    padding: 20px;
+  }
+  .stat-card:hover { transform: translateY(-5px) scale(1.02); }
+
+  .stat-icon {
+    font-size: 2.5rem;
+    margin-bottom: 8px;
+    display: inline-block;
+    color: #22345b;
+  }
+
+  .stat-card h4 {
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: #2f3d61;
+  }
+
+  /* ألوان مميزة من الباليت */
+  .text-success { color: #4b658a !important; }
+  .text-primary { color: #22345b !important; }
+  .text-danger  { color: #e20000 !important; }
+  .text-info    { color: #2f3d61 !important; }
+
+  /* تحسين الجدول */
+  .table thead {
+    background: #4b658a;
+    color: #ffffff;
+    font-weight: 600;
+  }
+
+  /* تحسين الرسوم */
+  .chart-fixed {
+    height: 440px !important;
+  }
+
+  /* أزرار */
+  .btn-primary {
+    background: linear-gradient(90deg, #22345b, #2f3d61);
+    border: none;
+    color: #fff;
+    font-weight: 600;
+  }
+  .btn-success {
+    background: linear-gradient(90deg, #4b658a, #2f3d61);
+    border: none;
+    color: #fff;
+    font-weight: 600;
+  }
+  .btn-primary:hover, .btn-success:hover {
+    opacity: 0.92;
+  }
+
+  /* التنقل بين التابات */
+  .nav-tabs .nav-link {
+    color: #363636;
+    font-weight: 600;
+  }
+  .nav-tabs .nav-link.active {
+    background: #2f3d61;
+    color: #fff !important;
+    border-radius: 8px 8px 0 0;
+  }
+</style>
+
+
+
+</head>
+<body>
+<div class="container py-5">
+  <div class="card shadow-sm p-4">
+
+    <!-- العنوان -->
+    <div class="d-flex justify-content-center mb-4">
+      <h2 class="mb-0 brand">📊 Green Bonds Risk Assessment</h2>
+    </div>
+
+    <!-- اختيار الطريقة -->
+    <ul class="nav nav-tabs mb-3" id="inputTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="upload-tab" data-bs-toggle="tab" data-bs-target="#upload" type="button">📥 رفع ملف CSV</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="manual-tab" data-bs-toggle="tab" data-bs-target="#manual" type="button">✍ إدخال يدوي</button>
+      </li>
+    </ul>
+
+    <div class="tab-content">
+      <!-- رفع ملف -->
+      <div class="tab-pane fade show active" id="upload" role="tabpanel">
+        <form method="POST" enctype="multipart/form-data" class="mb-4">
+          <input type="hidden" name="form_type" value="upload"> <!-- مهم -->
+          <div class="row g-2">
+            <div class="col-md-9">
+              <input class="form-control form-control-lg" type="file" name="file" accept=".csv,.xlsx">
+            </div>
+            <div class="col-md-3">
+              <button class="btn btn-success btn-lg w-100" type="submit">🔎 تحليل</button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- إدخال يدوي -->
+      <div class="tab-pane fade" id="manual" role="tabpanel">
+        <form method="POST" class="mb-4">
+          <input type="hidden" name="form_type" value="manual"> <!-- مهم -->
+          <div class="row g-3">
+            <div class="col-md-3">
+              <label class="form-label">🌍 Country</label>
+              <select class="form-select" name="country" required>
+                <option value="">Choose Country</option>
+                <option value="Egypt">Egypt</option>
+                <option value="United Arab Emirates">United Arab Emirates</option>
+                <option value="Saudi Arabia">Saudi Arabia</option>
+                <option value="Germany">Germany</option>
+                <option value="Spain">Spain</option>
+                <option value="Netherlands">Netherlands</option>
+                <option value="Italy">Italy</option>
+                <option value="France">France</option>
+                <option value="United Kingdom">United Kingdom</option>
+                <option value="United States">United States</option>
+                <option value="Japan">Japan</option>
+                <option value="China (Hong Kong)">China (Hong Kong)</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">🏭 Sector</label>
+              <select class="form-select" name="sector" required>
+                <option value="">Select Sector</option>
+                <option value="Corporate - Energy">Corporate - Energy</option>
+                <option value="Corporate - Utilities">Corporate - Utilities</option>
+                <option value="Financials - Consumer Finance">Financials - Consumer Finance</option>
+                <option value="Financials - Real estate">Financials - Real estate</option>
+                <option value="Corporate - Technology">Corporate - Technology</option>
+                <option value="Corporate - Materials">Corporate - Materials</option>
+                <option value="Financials - Banking">Financials - Banking</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">📊 Bond Type</label>
+              <select class="form-select" name="period" required>
+                <option value="">Choose Type</option>
+                <option value="Green">Green</option>
+                <option value="Sustainability">Sustainability</option>
+                <option value="Social">Social</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">💰 Bond Value (USD bn.)</label>
+              <div class="row">
+                <div class="col">
+                  <input type="number" class="form-control" name="bond_min" placeholder="From" step="0.01" required>
+                </div>
+                <div class="col">
+                  <input type="number" class="form-control" name="bond_max" placeholder="To" step="0.01" required>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="mt-3">
+            <button class="btn btn-primary btn-lg w-100" type="submit">🔎 تحليل</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- رسائل الخطأ -->
+    {% if error %}
+      <div class="alert alert-danger mt-3">{{ error }}</div>
+    {% endif %}
+
+    <!-- البطاقات -->
+    {% if prediction %}
+      <div class="row g-3 text-center mb-4 mt-3">
+        <div class="col-md-3">
+          <div class="card p-3 stat-card">
+            <div class="stat-icon text-success">✔</div>
+            <h6>العائد المتوقع</h6>
+            <h4 class="fw-bold text-success">{{ prediction['العائد المتوقع'] }}</h4>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card p-3 stat-card">
+            <div class="stat-icon text-primary">%</div>
+            <h6>حساسية أسعار الفائدة</h6>
+            <h4 class="fw-bold text-primary">{{ prediction['حساسية أسعار الفائدة'] }}</h4>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card p-3 stat-card">
+            <div class="stat-icon text-danger">⬇</div>
+            <h6>أكبر انخفاض</h6>
+            <h4 class="fw-bold text-danger">{{ prediction['أكبر انخفاض (Max Drawdown)'] }}</h4>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card p-3 stat-card">
+            <div class="stat-icon text-info">σ</div>
+            <h6>التذبذب</h6>
+            <h4 class="fw-bold text-info">{{ prediction['التذبذب (Volatility)'] }}</h4>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-3 text-center mb-4 stat-card">
+        <h5 class="mb-1">⚠️ مستوى المخاطرة: <b>{{ prediction['مستوى المخاطرة'] }}</b></h5>
+      </div>
+    {% endif %}
+
+    <!-- الرسم البياني -->
+    <div class="card p-3 mb-4 stat-card">
+      <h5 class="mb-2">📈 الأسعار الفعلية والتنبؤ المستقبلي</h5>
+      <canvas id="combinedChart" class="chart-fixed"></canvas>
+    </div>
+
+    <!-- جدول -->
+    {% if results is not none %}
+    <div class="card p-3 stat-card">
+      <h6 class="mb-2">📅 آخر 10 أيام</h6>
+      <div class="table-responsive">
+        <table class="table table-hover text-center align-middle">
+          <thead class="table-light">
+            <tr><th>التاريخ</th><th>السعر</th><th>العائد اليومي</th><th>التصنيف</th></tr>
+          </thead>
+          <tbody>
+            {% for _, r in results.iterrows() %}
+              <tr>
+                <td>{{ r[0] }}</td>
+                <td>{{ '%.4f'|format(r[1]) }}</td>
+                <td>{{ '%.4f'|format(r[2]) }}</td>
+                <td>{{ r[3] }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- JSON -->
+<script type="application/json" id="price-data-json">
+  {{ chart_data|default({})|tojson|safe }}
+</script>
+<script type="application/json" id="forecast-data-json">
+  {{ forecast_data|default({})|tojson|safe }}
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const priceRaw = document.getElementById("price-data-json")?.textContent || "{}";
+  const forecastRaw = document.getElementById("forecast-data-json")?.textContent || "{}";
+
+  let priceData = {}, forecastData = {};
+  try { priceData = JSON.parse(priceRaw); } catch(e){}
+  try { forecastData = JSON.parse(forecastRaw); } catch(e){}
+
+  const pLabels = priceData.labels || [];
+  const pValues = priceData.values || [];
+  const fLabels = forecastData.labels || [];
+  const fValues = forecastData.values || [];
+
+  if (pLabels.length === 0 || pValues.length === 0) return;
+
+  const allLabels = pLabels.concat(fLabels);
+  const actualSeries = pValues.concat(fValues.length ? Array(fValues.length).fill(null) : []);
+  const forecastSeries = fValues.length ? Array(pValues.length).fill(null).concat(fValues) : [];
+
+  new Chart(document.getElementById("combinedChart"), {
+    type: "line",
+    data: {
+      labels: allLabels,
+      datasets: [
+        {
+          label: "السعر الفعلي",
+          data: actualSeries,
+          borderColor: "#007bff",
+          backgroundColor: "rgba(0,123,255,0.08)",
+          borderWidth: 2,
+          pointRadius: 2,
+          tension: 0.3
+        },
+        ...(forecastSeries.length ? [{
+          label: "السعر المتوقع",
+          data: forecastSeries,
+          borderColor: "#ff7300",
+          borderWidth: 2,
+          borderDash: [6,6],
+          pointRadius: 3,
+          pointBackgroundColor: "#ff7300",
+          tension: 0.3
+        }] : [])
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'nearest', axis: 'x', intersect: false },
+      plugins: {
+        legend: { position: "top" },
+        tooltip: { enabled: true, mode: "index" },
+        zoom: {
+          zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: "x" },
+          pan: { enabled: true, mode: "x" }
+        }
+      },
+      scales: {
+        x: { title: { display: true, text: "التاريخ" } },
+        y: { title: { display: true, text: "السعر" } }
+      }
+    }
+  });
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
