@@ -1,4 +1,4 @@
-# 📊 Green Bonds Risk Assessment
+# 📊 Risk Assessment
 
 An advanced **Flask web application** for assessing the risk of **Green Bonds** using **Machine Learning** and **Time Series Forecasting**.  
 
