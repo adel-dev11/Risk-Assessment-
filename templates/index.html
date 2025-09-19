@@ -9,98 +9,26 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1"></script>
 
-<style>
-  body {
-    background: linear-gradient(135deg, #dddfd3, #4b658a); 
-    font-family: "Segoe UI", Tahoma, sans-serif;
-    direction: rtl;
-    color: #2f3d61;
-  }
-
-  .brand {
-    font-weight: 900;
-    font-size: 2rem;
-    background: linear-gradient(45deg, #2f3d61, #22345b, #4b658a);
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-align: center;
-    display: block;
-    transition: transform 0.3s ease;
-    letter-spacing: 1px;
-  }
-  .brand:hover { transform: scale(1.08) rotate(-1deg); }
-
-  .stat-card {
-    border-radius: 18px;
-    background: linear-gradient(145deg, #ffffff, #dddfd3);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.1);
-    transition: all 0.3s ease;
-    padding: 20px;
-  }
-  .stat-card:hover { transform: translateY(-5px) scale(1.02); }
-
-  .stat-icon {
-    font-size: 2.5rem;
-    margin-bottom: 8px;
-    display: inline-block;
-    color: #22345b;
-  }
-
-  .stat-card h4 {
-    font-weight: 700;
-    font-size: 1.5rem;
-    color: #2f3d61;
-  }
-
-  /* ألوان مميزة من الباليت */
-  .text-success { color: #4b658a !important; }
-  .text-primary { color: #22345b !important; }
-  .text-danger  { color: #e20000 !important; }
-  .text-info    { color: #2f3d61 !important; }
-
-  /* تحسين الجدول */
-  .table thead {
-    background: #4b658a;
-    color: #ffffff;
-    font-weight: 600;
-  }
-
-  /* تحسين الرسوم */
-  .chart-fixed {
-    height: 440px !important;
-  }
-
-  /* أزرار */
-  .btn-primary {
-    background: linear-gradient(90deg, #22345b, #2f3d61);
-    border: none;
-    color: #fff;
-    font-weight: 600;
-  }
-  .btn-success {
-    background: linear-gradient(90deg, #4b658a, #2f3d61);
-    border: none;
-    color: #fff;
-    font-weight: 600;
-  }
-  .btn-primary:hover, .btn-success:hover {
-    opacity: 0.92;
-  }
-
-  /* التنقل بين التابات */
-  .nav-tabs .nav-link {
-    color: #363636;
-    font-weight: 600;
-  }
-  .nav-tabs .nav-link.active {
-    background: #2f3d61;
-    color: #fff !important;
-    border-radius: 8px 8px 0 0;
-  }
-</style>
-
-
-
+  <style>
+    body { background: linear-gradient(135deg, #dddfd3, #4b658a); font-family: "Segoe UI", Tahoma, sans-serif; direction: rtl; color: #2f3d61; }
+    .brand { font-weight: 900; font-size: 2rem; background: linear-gradient(45deg, #2f3d61, #22345b, #4b658a); background-clip: text; -webkit-text-fill-color: transparent; text-align: center; display: block; transition: transform 0.3s ease; letter-spacing: 1px; }
+    .brand:hover { transform: scale(1.08) rotate(-1deg); }
+    .stat-card { border-radius: 18px; background: linear-gradient(145deg, #ffffff, #dddfd3); box-shadow: 0 6px 16px rgba(0,0,0,0.1); transition: all 0.3s ease; padding: 20px; }
+    .stat-card:hover { transform: translateY(-5px) scale(1.02); }
+    .stat-icon { font-size: 2.5rem; margin-bottom: 8px; display: inline-block; color: #22345b; }
+    .stat-card h4 { font-weight: 700; font-size: 1.5rem; color: #2f3d61; }
+    .text-success { color: #4b658a !important; }
+    .text-primary { color: #22345b !important; }
+    .text-danger  { color: #e20000 !important; }
+    .text-info    { color: #2f3d61 !important; }
+    .table thead { background: #4b658a; color: #ffffff; font-weight: 600; }
+    .chart-fixed { height: 440px !important; }
+    .btn-primary { background: linear-gradient(90deg, #22345b, #2f3d61); border: none; color: #fff; font-weight: 600; }
+    .btn-success { background: linear-gradient(90deg, #4b658a, #2f3d61); border: none; color: #fff; font-weight: 600; }
+    .btn-primary:hover, .btn-success:hover { opacity: 0.92; }
+    .nav-tabs .nav-link { color: #363636; font-weight: 600; }
+    .nav-tabs .nav-link.active { background: #2f3d61; color: #fff !important; border-radius: 8px 8px 0 0; }
+  </style>
 </head>
 <body>
 <div class="container py-5">
@@ -114,10 +42,10 @@
     <!-- اختيار الطريقة -->
     <ul class="nav nav-tabs mb-3" id="inputTabs" role="tablist">
       <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="upload-tab" data-bs-toggle="tab" data-bs-target="#upload" type="button">📥 رفع ملف CSV</button>
+        <button class="nav-link active" id="upload-tab" data-bs-toggle="tab" data-bs-target="#upload" type="button">📥 Data Upload & Risk Analysis </button>
       </li>
       <li class="nav-item" role="presentation">
-        <button class="nav-link" id="manual-tab" data-bs-toggle="tab" data-bs-target="#manual" type="button">✍ إدخال يدوي</button>
+        <button class="nav-link" id="manual-tab" data-bs-toggle="tab" data-bs-target="#manual" type="button">✍ Green Bond Filters</button>
       </li>
     </ul>
 
@@ -125,13 +53,13 @@
       <!-- رفع ملف -->
       <div class="tab-pane fade show active" id="upload" role="tabpanel">
         <form method="POST" enctype="multipart/form-data" class="mb-4">
-          <input type="hidden" name="form_type" value="upload"> <!-- مهم -->
+          <input type="hidden" name="form_type" value="upload">
           <div class="row g-2">
             <div class="col-md-9">
               <input class="form-control form-control-lg" type="file" name="file" accept=".csv,.xlsx">
             </div>
             <div class="col-md-3">
-              <button class="btn btn-success btn-lg w-100" type="submit">🔎 تحليل</button>
+              <button class="btn btn-success btn-lg w-100" type="submit">🔎 Upload & Assess</button>
             </div>
           </div>
         </form>
@@ -140,7 +68,7 @@
       <!-- إدخال يدوي -->
       <div class="tab-pane fade" id="manual" role="tabpanel">
         <form method="POST" class="mb-4">
-          <input type="hidden" name="form_type" value="manual"> <!-- مهم -->
+          <input type="hidden" name="form_type" value="manual">
           <div class="row g-3">
             <div class="col-md-3">
               <label class="form-label">🌍 Country</label>
@@ -195,7 +123,7 @@
             </div>
           </div>
           <div class="mt-3">
-            <button class="btn btn-primary btn-lg w-100" type="submit">🔎 تحليل</button>
+            <button class="btn btn-primary btn-lg w-100" type="submit">🔎 Assess </button>
           </div>
         </form>
       </div>
@@ -206,58 +134,68 @@
       <div class="alert alert-danger mt-3">{{ error }}</div>
     {% endif %}
 
+    <!-- النتائج (summary للـ manual) -->
+    {% if summary %}
+      <div class="card p-3 mb-4 stat-card">
+        <h5>📊 Result Summary</h5>
+        <p>Bonds Number: {{ summary['count'] }}</p>
+        <p>Total value: {{ summary['total_bond'] }}</p>
+      </div>
+    {% endif %}
+
     <!-- البطاقات -->
     {% if prediction %}
       <div class="row g-3 text-center mb-4 mt-3">
         <div class="col-md-3">
           <div class="card p-3 stat-card">
             <div class="stat-icon text-success">✔</div>
-            <h6>العائد المتوقع</h6>
+            <h6>Expected return</h6>
             <h4 class="fw-bold text-success">{{ prediction['العائد المتوقع'] }}</h4>
           </div>
         </div>
         <div class="col-md-3">
           <div class="card p-3 stat-card">
             <div class="stat-icon text-primary">%</div>
-            <h6>حساسية أسعار الفائدة</h6>
+            <h6>Benefit rate sevsitivity</h6>
             <h4 class="fw-bold text-primary">{{ prediction['حساسية أسعار الفائدة'] }}</h4>
           </div>
         </div>
         <div class="col-md-3">
           <div class="card p-3 stat-card">
             <div class="stat-icon text-danger">⬇</div>
-            <h6>أكبر انخفاض</h6>
+            <h6>Max Drawdown</h6>
             <h4 class="fw-bold text-danger">{{ prediction['أكبر انخفاض (Max Drawdown)'] }}</h4>
           </div>
         </div>
         <div class="col-md-3">
           <div class="card p-3 stat-card">
             <div class="stat-icon text-info">σ</div>
-            <h6>التذبذب</h6>
+            <h6>Volatility</h6>
             <h4 class="fw-bold text-info">{{ prediction['التذبذب (Volatility)'] }}</h4>
           </div>
         </div>
       </div>
-
       <div class="card p-3 text-center mb-4 stat-card">
-        <h5 class="mb-1">⚠️ مستوى المخاطرة: <b>{{ prediction['مستوى المخاطرة'] }}</b></h5>
+        <h5 class="mb-1">⚠️ Risk Level: <b>{{ prediction['مستوى المخاطرة'] }}</b></h5>
       </div>
     {% endif %}
 
     <!-- الرسم البياني -->
+    {% if chart_data %}
     <div class="card p-3 mb-4 stat-card">
-      <h5 class="mb-2">📈 الأسعار الفعلية والتنبؤ المستقبلي</h5>
+      <h5 class="mb-2">📈 Actual prices & Future forecasts</h5>
       <canvas id="combinedChart" class="chart-fixed"></canvas>
     </div>
+    {% endif %}
 
     <!-- جدول -->
     {% if results is not none %}
     <div class="card p-3 stat-card">
-      <h6 class="mb-2">📅 آخر 10 أيام</h6>
+      <h6 class="mb-2">📅 The last 10 days</h6>
       <div class="table-responsive">
         <table class="table table-hover text-center align-middle">
           <thead class="table-light">
-            <tr><th>التاريخ</th><th>السعر</th><th>العائد اليومي</th><th>التصنيف</th></tr>
+            <tr><th>Date</th><th>Price</th><th>Daily return</th><th>Classification</th></tr>
           </thead>
           <tbody>
             {% for _, r in results.iterrows() %}
@@ -309,43 +247,15 @@ document.addEventListener("DOMContentLoaded", function () {
     data: {
       labels: allLabels,
       datasets: [
-        {
-          label: "السعر الفعلي",
-          data: actualSeries,
-          borderColor: "#007bff",
-          backgroundColor: "rgba(0,123,255,0.08)",
-          borderWidth: 2,
-          pointRadius: 2,
-          tension: 0.3
-        },
-        ...(forecastSeries.length ? [{
-          label: "السعر المتوقع",
-          data: forecastSeries,
-          borderColor: "#ff7300",
-          borderWidth: 2,
-          borderDash: [6,6],
-          pointRadius: 3,
-          pointBackgroundColor: "#ff7300",
-          tension: 0.3
-        }] : [])
+        { label: "Actual Price", data: actualSeries, borderColor: "#007bff", backgroundColor: "rgba(0,123,255,0.08)", borderWidth: 2, pointRadius: 2, tension: 0.3 },
+        ...(forecastSeries.length ? [{ label: "Future Forecasts", data: forecastSeries, borderColor: "#ff7300", borderWidth: 2, borderDash: [6,6], pointRadius: 3, pointBackgroundColor: "#ff7300", tension: 0.3 }] : [])
       ]
     },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      interaction: { mode: 'nearest', axis: 'x', intersect: false },
-      plugins: {
-        legend: { position: "top" },
-        tooltip: { enabled: true, mode: "index" },
-        zoom: {
-          zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: "x" },
-          pan: { enabled: true, mode: "x" }
-        }
+    options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'nearest', axis: 'x', intersect: false },
+      plugins: { legend: { position: "top" }, tooltip: { enabled: true, mode: "index" },
+        zoom: { zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: "x" }, pan: { enabled: true, mode: "x" } }
       },
-      scales: {
-        x: { title: { display: true, text: "التاريخ" } },
-        y: { title: { display: true, text: "السعر" } }
-      }
+      scales: { x: { title: { display: true, text: "Date" } }, y: { title: { display: true, text: "Price" } } }
     }
   });
 });
