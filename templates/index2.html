@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Bond Analysis</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light p-4">
+ <style>
+    body { background: linear-gradient(135deg, #dddfd3, #4b658a); font-family: "Segoe UI", Tahoma, sans-serif; direction: rtl; color: #2f3d61; }
+    .brand { font-weight: 900; font-size: 2rem; background: linear-gradient(45deg, #2f3d61, #22345b, #4b658a); background-clip: text; -webkit-text-fill-color: transparent; text-align: center; display: block; transition: transform 0.3s ease; letter-spacing: 1px; }
+    .brand:hover { transform: scale(1.08) rotate(-1deg); }
+    .stat-card { border-radius: 18px; background: linear-gradient(145deg, #ffffff, #dddfd3); box-shadow: 0 6px 16px rgba(0,0,0,0.1); transition: all 0.3s ease; padding: 20px; }
+    .stat-card:hover { transform: translateY(-5px) scale(1.02); }
+    .stat-icon { font-size: 2.5rem; margin-bottom: 8px; display: inline-block; color: #22345b; }
+    .stat-card h4 { font-weight: 700; font-size: 1.5rem; color: #2f3d61; }
+    .text-success { color: #4b658a !important; }
+    .text-primary { color: #22345b !important; }
+    .text-danger  { color: #e20000 !important; }
+    .text-info    { color: #2f3d61 !important; }
+    .table thead { background: #4b658a; color: #ffffff; font-weight: 600; }
+    .chart-fixed { height: 440px !important; }
+    .btn-primary { background: linear-gradient(90deg, #22345b, #2f3d61); border: none; color: #fff; font-weight: 600; }
+    .btn-success { background: linear-gradient(90deg, #4b658a, #2f3d61); border: none; color: #fff; font-weight: 600; }
+    .btn-primary:hover, .btn-success:hover { opacity: 0.92; }
+    .nav-tabs .nav-link { color: #363636; font-weight: 600; }
+    .nav-tabs .nav-link.active { background: #2f3d61; color: #fff !important; border-radius: 8px 8px 0 0; }
+  </style>
+<div class="container">
+  <h2 class="mb-4 text-center">📊 Green Bond Risk Analysis</h2>
+
+  <!-- الفورم -->
+  <div class="card shadow p-4 mb-4">
+    <form method="POST" class="row g-3">
+      <div class="col-md-3">
+        <label class="form-label">🌍 Country</label>
+        <select class="form-select" name="country" required>
+                <option value="">Choose Country</option>
+                <option value="Egypt">Egypt</option>
+                <option value="United Arab Emirates">United Arab Emirates</option>
+                <option value="Saudi Arabia">Saudi Arabia</option>
+                <option value="Germany">Germany</option>
+                <option value="Spain">Spain</option>
+                <option value="Netherlands">Netherlands</option>
+                <option value="Italy">Italy</option>
+                <option value="France">France</option>
+                <option value="United Kingdom">United Kingdom</option>
+                <option value="United States">United States</option>
+                <option value="Japan">Japan</option>
+                <option value="China (Hong Kong)">China (Hong Kong)</option>
+              </select>
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label">🏭 Sector</label>
+        <select class="form-select" name="sector" required>
+                <option value="">Select Sector</option>
+                <option value="Corporate - Energy">Corporate - Energy</option>
+                <option value="Corporate - Utilities">Corporate - Utilities</option>
+                <option value="Financials - Consumer Finance">Financials - Consumer Finance</option>
+                <option value="Financials - Real estate">Financials - Real estate</option>
+                <option value="Corporate - Technology">Corporate - Technology</option>
+                <option value="Corporate - Materials">Corporate - Materials</option>
+                <option value="Financials - Banking">Financials - Banking</option>
+              </select>
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label">📊 Bond Type</label>
+        <select class="form-select" name="period" required>
+                <option value="">Choose Type</option>
+                <option value="Green">Green</option>
+                <option value="Sustainability">Sustainability</option>
+                <option value="Social">Social</option>
+              </select>
+      </div>
+
+      <div class="col-md-3">
+        <label class="form-label">💰 Bond Value (USD bn.)</label>
+        <div class="row">
+          <div class="col">
+            <input type="number" class="form-control" name="bond_min" placeholder="From" step="0.01" required>
+          </div>
+          <div class="col">
+            <input type="number" class="form-control" name="bond_max" placeholder="To" step="0.01" required>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 mt-3">
+        <button class="btn btn-primary btn-lg w-100" type="submit">🔎 Analysis</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- عرض النتائج -->
+  {% if results %}
+  <div class="card shadow p-4">
+    <h4>✅ Data</h4>
+    {{ results|safe }}
+
+    <h5 class="mt-4">📈 Summary</h5>
+    <ul>
+      <li>Number of Records: {{ summary.count }}</li>
+      <li>Average Bond Value: {{ summary.avg_bond }}</li>
+      <li>Total Bond Value: {{ summary.total_bond }}</li>
+    </ul>
+  </div>
+  {% elif summary == None %}
+  <p class="text-muted">Fill the form and click <b>Analysis</b> to see results.</p>
+  {% else %}
+  <div class="alert alert-warning">⚠️ No records found for the selected filters.</div>
+  {% endif %}
+
+</div>
+
+</body>
+</html>
